@@ -1,0 +1,25 @@
+# dependencies
+node_modules/
+**/node_modules/
+
+# builds
+dist/
+build/
+
+# env & secrets
+.env
+**/.env
+!**/.env.example
+
+# logs & os junk
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+
+# editor
+.vscode/
+.idea/
+
+# coursework scratch output
+coursework/**/scratch/
