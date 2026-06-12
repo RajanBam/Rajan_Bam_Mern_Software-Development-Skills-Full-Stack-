@@ -1,0 +1,11 @@
+{
+  "name": "express-mini-app",
+  "version": "1.0.0",
+  "description": "Coding-along Express API from the crash course (routing, middleware, validation)",
+  "main": "server.js",
+  "scripts": { "start": "node server.js" },
+  "dependencies": {
+    "express": "^4.19.2",
+    "express-validator": "^7.1.0"
+  }
+}
