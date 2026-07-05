@@ -91,6 +91,35 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* ABOUT THE MAKER */}
+      <section className="section alt" id="about">
+        <div className="container">
+          <div className="about-card reveal">
+            <div className="about-avatar">RB</div>
+            <div>
+              <div className="eyebrow" style={{ fontSize: 18 }}>the human behind the crayons</div>
+              <h2 style={{ fontSize: 'clamp(28px,4vw,42px)', marginTop: 4 }}>Hi, I'm Rajan Bam 👋</h2>
+              <p style={{ fontSize: 19, color: 'var(--ink-soft)', lineHeight: 1.55, marginTop: 12 }}>
+                I'm a Computer Science student at <strong>LUT University</strong> in Lappeenranta,
+                Finland. I finished my +2 in Science at <strong>Morgan International College</strong>,
+                Kathmandu, and I love turning ideas into things people can actually click on.
+                I built Inkboard for my Software Development Skills <em>Fullstack</em> module to
+                learn the MERN stack end to end — and to make something I'd genuinely enjoy using.
+              </p>
+              <div className="about-tags">
+                {['MongoDB', 'Express', 'React', 'Node.js', 'Socket.IO', 'Problem-solving'].map((t) => (
+                  <span key={t} className="about-tag">{t}</span>
+                ))}
+              </div>
+              <div style={{ marginTop: 18, display: 'flex', gap: 14, flexWrap: 'wrap' }}>
+                <a className="btn btn-soft" href="mailto:bam049363@gmail.com">✉️ bam049363@gmail.com</a>
+                <a className="btn btn-soft" href="https://github.com/RajanBam" target="_blank" rel="noreferrer">🐙 github.com/RajanBam</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* CTA */}
       <section className="cta-band container">
         <h2 className="reveal">Grab a crayon.</h2>
