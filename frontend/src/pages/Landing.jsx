@@ -48,6 +48,23 @@ export default function Landing() {
         <HeroMock />
       </header>
 
+      {/* STATS STRIP */}
+      <section className="container">
+        <div className="stats reveal">
+          {[
+            ['12', 'sample boards'],
+            ['13+', 'drawing tools'],
+            ['∞', 'canvas space'],
+            ['0', 'setup — just draw'],
+          ].map(([n, label]) => (
+            <div className="stat" key={label}>
+              <div className="stat-n marker">{n}</div>
+              <div className="stat-l">{label}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* FEATURE STORY ROWS */}
       <section id="features" className="section">
         <div className="container">
@@ -88,6 +105,66 @@ export default function Landing() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* HOW IT WORKS */}
+      <section className="section">
+        <div className="container">
+          <h2 className="reveal" style={{ fontSize: 'clamp(30px,4vw,46px)', textAlign: 'center', marginBottom: 8 }}>
+            Three steps to your first doodle
+          </h2>
+          <p className="reveal" style={{ textAlign: 'center', color: 'var(--ink-soft)', fontSize: 20, marginBottom: 46 }}>
+            No manual, no tutorial. If you can hold a crayon, you already know how.
+          </p>
+          <div className="steps">
+            {[
+              ['1', '✏️', 'Make a board', 'Sign up in seconds and hit “New board”. A fresh, endless sheet of paper opens up, ready for anything.'],
+              ['2', '🖐️', 'Draw it out', 'Sketch boxes, arrows and notes, scribble freehand, drop stickers. Everything comes out looking hand-made, never stiff.'],
+              ['3', '🔗', 'Share the link', 'Flip a board public and send the link. Friends can watch your cursor and draw right alongside you, live.'],
+            ].map(([num, emoji, title, body]) => (
+              <div className="step reveal" key={num}>
+                <div className="step-badge marker">{num}</div>
+                <div style={{ fontSize: 34 }}>{emoji}</div>
+                <h3 style={{ fontSize: 26, margin: '10px 0 8px' }}>{title}</h3>
+                <p style={{ color: 'var(--ink-soft)', fontSize: 18, lineHeight: 1.5 }}>{body}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* QUOTE / PHILOSOPHY */}
+      <section className="section alt">
+        <div className="container" style={{ maxWidth: 760, textAlign: 'center' }}>
+          <div className="reveal" style={{ fontSize: 44, marginBottom: 10 }}>“</div>
+          <p className="reveal hand" style={{ fontSize: 'clamp(26px,3.6vw,38px)', lineHeight: 1.35 }}>
+            The best ideas don't arrive in neat little boxes — they arrive as messy
+            scribbles on the back of a napkin. Inkboard just gives that napkin
+            infinite room, a save button, and a friend to draw with.
+          </p>
+          <p className="reveal" style={{ marginTop: 18, color: 'var(--ink-soft)', fontSize: 18 }}>— why I built it</p>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="section">
+        <div className="container" style={{ maxWidth: 780 }}>
+          <h2 className="reveal" style={{ fontSize: 'clamp(30px,4vw,46px)', textAlign: 'center', marginBottom: 40 }}>
+            A few quick questions
+          </h2>
+          {[
+            ['Do I need to install anything?', "Nope. Inkboard runs in your browser. Make an account and you're drawing — nothing to download."],
+            ['Can other people draw with me?', "Yes! Open a board, share the link, and you'll see each other's cursors and strokes appear in real time."],
+            ['Will my boards be saved?', 'Always. Every change is saved automatically to the cloud, so you can close the tab and pick up right where you left off.'],
+            ['Can I get my drawing out?', 'Export any board as a crisp PNG image or a scalable SVG, or share a read-only public link.'],
+            ['Is it really free?', 'For this project, yes — it was built as coursework, so go wild and draw as much as you like.'],
+          ].map(([q, a]) => (
+            <details className="faq reveal" key={q}>
+              <summary>{q}</summary>
+              <p>{a}</p>
+            </details>
+          ))}
         </div>
       </section>
 

@@ -100,6 +100,42 @@
 .cta-band h2 { font-size: clamp(34px, 5vw, 60px); letter-spacing: -0.03em; }
 .cta-band p { font-size: 21px; color: var(--ink-soft); margin: 16px 0 30px; }
 
+/* stats strip */
+.stats {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px;
+  margin: 40px 0 10px; padding: 30px; border-radius: 22px;
+  background: var(--surface); border: 1px solid var(--hairline); box-shadow: var(--shadow-card);
+}
+.stat { text-align: center; }
+.stat-n { font-size: clamp(34px, 5vw, 54px); color: var(--accent); line-height: 1; }
+.stat-l { color: var(--ink-soft); font-size: 17px; margin-top: 6px; }
+@media (max-width: 640px) { .stats { grid-template-columns: repeat(2, 1fr); } }
+
+/* how-it-works steps */
+.steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+.step {
+  position: relative; background: var(--surface); border: 1px solid var(--hairline);
+  border-radius: 20px; padding: 34px 26px 28px; box-shadow: var(--shadow-card);
+}
+.step-badge {
+  position: absolute; top: -18px; left: 26px; width: 44px; height: 44px; border-radius: 50%;
+  display: grid; place-items: center; font-size: 26px; color: #fff;
+  background: linear-gradient(135deg, var(--crayon-red), var(--crayon-orange)); box-shadow: var(--shadow-card);
+}
+@media (max-width: 780px) { .steps { grid-template-columns: 1fr; } }
+
+/* FAQ */
+.faq {
+  border-bottom: 1px dashed var(--hairline); padding: 16px 4px;
+}
+.faq summary {
+  cursor: pointer; font-size: 22px; list-style: none; display: flex; justify-content: space-between; align-items: center;
+}
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after { content: '+'; color: var(--accent); font-size: 26px; }
+.faq[open] summary::after { content: '–'; }
+.faq p { color: var(--ink-soft); font-size: 18px; line-height: 1.55; margin: 10px 2px 4px; }
+
 /* about-the-maker card */
 .about-card {
   display: grid; grid-template-columns: auto 1fr; gap: 34px; align-items: center;
