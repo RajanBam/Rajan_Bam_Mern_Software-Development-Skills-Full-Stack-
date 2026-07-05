@@ -18,7 +18,13 @@ export default function InkCanvas({
   selectedId, setSelectedId,
   socketSend, remoteCursors = {}, remoteLasers = {},
   readOnly = false,
+  showGrid = false, snapToGrid = false,
 }) {
+  const GRID = 24;
+  // Round a world point to the grid when snapping is on.
+  const snap = useCallback((p) => (
+    snapToGrid ? { x: Math.round(p.x / GRID) * GRID, y: Math.round(p.y / GRID) * GRID } : p
+  ), [snapToGrid]);
   const containerRef = useRef(null);
   const canvasRef = useRef(null);
   const [view, setView] = useState({ offsetX: 0, offsetY: 0, zoom: 1 });
@@ -71,8 +77,9 @@ export default function InkCanvas({
     renderScene(canvas, elementsRef.current, {
       width: size.width, height: size.height, dpr,
       offsetX: view.offsetX, offsetY: view.offsetY, zoom: view.zoom,
+      showGrid, gridSize: GRID,
     });
-  }, [size, view]);
+  }, [size, view, showGrid]);
 
   useEffect(() => { paint(); }, [paint, elements]);
 
@@ -142,26 +149,27 @@ export default function InkCanvas({
       const hit = elementAt(elementsRef.current, w.x, w.y, 8 / viewRef.current.zoom);
       if (hit) {
         setSelectedId(hit.id);
-        drag.current = { mode: 'move', id: hit.id, last: w };
+        drag.current = { mode: 'move', id: hit.id, last: snap(w) };
       } else {
         setSelectedId(null);
       }
       return;
     }
 
-    // ---- creation tools ----
+    // ---- creation tools ---- (start point snaps to the grid when enabled)
+    const s = snap(w);
     if (SHAPE_TOOLS.has(tool)) {
       const base = { id: makeId(), type: tool, color, strokeWidth, seed: makeSeed() };
       let el;
       if (tool === TOOLS.ARROW || tool === TOOLS.LINE) {
         const startEl = elementAt(elementsRef.current, w.x, w.y, 8 / viewRef.current.zoom);
-        el = { ...base, x1: w.x, y1: w.y, x2: w.x, y2: w.y,
+        el = { ...base, x1: s.x, y1: s.y, x2: s.x, y2: s.y,
           startBinding: startEl && startEl.type !== tool ? startEl.id : null, endBinding: null };
       } else {
-        el = { ...base, x: w.x, y: w.y, width: 0, height: 0 };
+        el = { ...base, x: s.x, y: s.y, width: 0, height: 0 };
       }
       setElements((els) => [...els, el]);
-      drag.current = { mode: 'create', id: el.id, start: w };
+      drag.current = { mode: 'create', id: el.id, start: s };
       return;
     }
 
@@ -173,7 +181,7 @@ export default function InkCanvas({
     }
 
     if (tool === TOOLS.TEXT) {
-      const el = { id: makeId(), type: TOOLS.TEXT, x: w.x, y: w.y, text: '', color, fontSize: 30, seed: makeSeed() };
+      const el = { id: makeId(), type: TOOLS.TEXT, x: s.x, y: s.y, text: '', color, fontSize: 30, seed: makeSeed() };
       setElements((els) => [...els, el]);
       openEditor(el);
       onToolReset && onToolReset();
@@ -181,7 +189,8 @@ export default function InkCanvas({
     }
 
     if (tool === TOOLS.STICKY) {
-      const el = { id: makeId(), type: TOOLS.STICKY, x: w.x, y: w.y, width: DEFAULT_STICKY, height: DEFAULT_STICKY, text: '', color, seed: makeSeed() };
+      // Sticky notes default to a warm paper colour rather than the pen colour.
+      const el = { id: makeId(), type: TOOLS.STICKY, x: s.x, y: s.y, width: DEFAULT_STICKY, height: DEFAULT_STICKY, text: '', color: '#ffd93d', seed: makeSeed() };
       setElements((els) => [...els, el]);
       openEditor(el);
       onToolReset && onToolReset();
@@ -189,7 +198,7 @@ export default function InkCanvas({
     }
 
     if (tool === TOOLS.STICKER) {
-      const el = { id: makeId(), type: TOOLS.STICKER, x: w.x, y: w.y, size: 64, emoji: sticker };
+      const el = { id: makeId(), type: TOOLS.STICKER, x: s.x, y: s.y, size: 64, emoji: sticker };
       const next = [...elementsRef.current, el];
       setElements(next);
       commit(next); // pass the snapshot explicitly (state isn't flushed yet this tick)
@@ -227,13 +236,14 @@ export default function InkCanvas({
       return;
     }
     if (d.mode === 'create') {
+      const sw2 = snap(w);
       setElements((els) => els.map((el) => {
         if (el.id !== d.id) return el;
         if (el.type === TOOLS.ARROW || el.type === TOOLS.LINE) {
           const endEl = elementAt(elementsRef.current, w.x, w.y, 8 / viewRef.current.zoom);
-          return { ...el, x2: w.x, y2: w.y, endBinding: endEl && endEl.id !== el.id && endEl.type !== el.type ? endEl.id : null };
+          return { ...el, x2: sw2.x, y2: sw2.y, endBinding: endEl && endEl.id !== el.id && endEl.type !== el.type ? endEl.id : null };
         }
-        return { ...el, width: w.x - d.start.x, height: w.y - d.start.y };
+        return { ...el, width: sw2.x - d.start.x, height: sw2.y - d.start.y };
       }));
       broadcastElements(elementsRef.current);
       return;
@@ -244,9 +254,11 @@ export default function InkCanvas({
       return;
     }
     if (d.mode === 'move') {
-      const dx = w.x - d.last.x;
-      const dy = w.y - d.last.y;
-      d.last = w;
+      const m = snap(w);
+      const dx = m.x - d.last.x;
+      const dy = m.y - d.last.y;
+      if (dx === 0 && dy === 0) return; // wait until we cross a grid step when snapping
+      d.last = m;
       setElements((els) => els.map((el) => (el.id === d.id ? moveElement(el, dx, dy) : el)));
       broadcastElements(elementsRef.current);
       return;
@@ -287,7 +299,10 @@ export default function InkCanvas({
   // ---- text / sticky editing overlay ----
   function openEditor(el) {
     const s = toScreen(el.x, el.y);
-    setEditing({ id: el.id, screenX: s.x, screenY: s.y, value: el.text || '', type: el.type });
+    setEditing({
+      id: el.id, screenX: s.x, screenY: s.y, value: el.text || '', type: el.type,
+      fontSize: el.fontSize, textColor: el.color, stickyColor: el.color,
+    });
   }
   function onEditChange(value) {
     setEditing((ed) => ({ ...ed, value }));
@@ -378,25 +393,48 @@ export default function InkCanvas({
         return <RemoteCursor key={id} x={s.x} y={s.y} name={c.name} color={c.color} />;
       })}
 
-      {/* inline text editor */}
+      {/* inline text editor — pointer events are stopped so typing/selecting
+          inside the box never leaks down to the canvas (that used to grab and
+          drag the element instead of letting you edit). */}
       {editing && (
         <textarea
           autoFocus
           value={editing.value}
+          placeholder={editing.type === TOOLS.STICKY ? 'write a note…' : 'type here…'}
           onChange={(e) => onEditChange(e.target.value)}
           onBlur={closeEditor}
-          onKeyDown={(e) => { if (e.key === 'Escape') closeEditor(); }}
+          onPointerDown={(e) => e.stopPropagation()}
+          onPointerMove={(e) => e.stopPropagation()}
+          onPointerUp={(e) => e.stopPropagation()}
+          onWheel={(e) => e.stopPropagation()}
+          onDoubleClick={(e) => e.stopPropagation()}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') { e.preventDefault(); closeEditor(); }
+            // Enter commits a plain text label; Shift+Enter (and sticky notes) add a newline.
+            if (e.key === 'Enter' && !e.shiftKey && editing.type === TOOLS.TEXT) {
+              e.preventDefault();
+              closeEditor();
+            }
+          }}
           style={{
             position: 'absolute',
             left: editing.screenX,
-            top: editing.type === TOOLS.TEXT ? editing.screenY - 30 * view.zoom : editing.screenY + 10 * view.zoom,
+            top: editing.type === TOOLS.TEXT ? editing.screenY - 28 * view.zoom : editing.screenY + 8 * view.zoom,
             font: editing.type === TOOLS.TEXT
-              ? `${30 * view.zoom}px Caveat, cursive`
+              ? `${(editing.fontSize || 30) * view.zoom}px 'Caveat', cursive`
               : `${22 * view.zoom}px 'Patrick Hand', cursive`,
-            width: editing.type === TOOLS.STICKY ? DEFAULT_STICKY * view.zoom : 220,
-            minHeight: 30,
-            border: 'none', outline: '2px dashed var(--accent)', background: 'rgba(255,255,255,0.6)',
-            color: 'var(--ink)', resize: 'none', padding: 6, borderRadius: 6,
+            lineHeight: 1.15,
+            width: editing.type === TOOLS.STICKY ? (DEFAULT_STICKY - 20) * view.zoom : 260,
+            height: editing.type === TOOLS.STICKY ? (DEFAULT_STICKY - 30) * view.zoom : 'auto',
+            minHeight: 34,
+            border: 'none',
+            outline: '2px dashed var(--accent)',
+            // Solid, theme-aware surface so the text is always readable (the old
+            // translucent white made dark-mode text invisible).
+            background: editing.type === TOOLS.STICKY ? (editing.stickyColor || '#ffd93d') : 'var(--surface)',
+            color: editing.type === TOOLS.STICKY ? '#3a3a3a' : (editing.textColor || 'var(--ink)'),
+            resize: 'none', padding: 6, borderRadius: 6, boxShadow: 'var(--shadow-card)',
+            caretColor: 'var(--accent)', zIndex: 20,
           }}
         />
       )}
