@@ -59,15 +59,16 @@ infinite pan & zoom, undo/redo, and keyboard shortcuts.
 - **Node.js** 18+ and npm
 - **MongoDB** running locally. On the course this is installed **as a service**
   (see the module's setup note), so it starts automatically on
-  `mongodb://127.0.0.1:27017`. A free **MongoDB Atlas** cluster works too — just
-  use its connection string in step 1.
+  `mongodb://127.0.0.1:27017`. A free **MongoDB Atlas** cluster works too — put its
+  `mongodb+srv://…` string in `MONGODB_URI` (step 1). If your Atlas password has
+  special characters, URL-encode them — e.g. `!` becomes `%21`.
 
 ### 1. Backend
 ```bash
 cd backend
 npm install
 cp .env.example .env        # then edit .env if needed (see below)
-npm run seed                # optional: creates a demo account + sample boards
+npm run seed                # optional: demo account + 12 ready-made sample boards
 npm run dev                 # starts on http://localhost:5000
 ```
 
