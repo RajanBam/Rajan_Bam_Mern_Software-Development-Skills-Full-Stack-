@@ -1,4 +1,4 @@
-# Inkboard — a collaborative hand-drawn whiteboard
+# Inkboard: a collaborative hand-drawn whiteboard
 
 **Author:** Rajan Bam (002295635)
 **Course:** Software Development Skills — Fullstack module (MERN stack)
