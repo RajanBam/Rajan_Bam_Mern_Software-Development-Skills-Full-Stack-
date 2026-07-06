@@ -4,7 +4,7 @@ A short screen recording that walks through the project running end-to-end.
 
 ## ▶️ Watch
 
-**Link:** _<!-- PASTE YOUR VIDEO LINK HERE (e.g. an unlisted YouTube URL) -->_
+**Link:** https://youtu.be/-6Z9fUw8IMw
 
 <!--
 How I plan to record it (OBS Studio, per the assignment note):
